@@ -1,0 +1,46 @@
+import { Home, Dumbbell, Utensils, TrendingUp, User } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useApp } from "@/context/app-context";
+import { useHaptic } from "@/hooks/use-haptic";
+
+const navigationItems = [
+  { id: "dashboard", label: "Dashboard", icon: Home },
+  { id: "workouts", label: "Workouts", icon: Dumbbell },
+  { id: "nutrition", label: "Nutrition", icon: Utensils },
+  { id: "progress", label: "Progress", icon: TrendingUp },
+  { id: "profile", label: "Profile", icon: User },
+];
+
+export function BottomNavigation() {
+  const { currentView, setCurrentView } = useApp();
+  const { triggerHaptic } = useHaptic();
+
+  const handleNavigation = (viewId: string) => {
+    triggerHaptic('light');
+    setCurrentView(viewId);
+  };
+
+  return (
+    <nav className="bg-card border-t border-border p-2 flex justify-around">
+      {navigationItems.map((item) => {
+        const Icon = item.icon;
+        const isActive = currentView === item.id;
+        
+        return (
+          <Button
+            key={item.id}
+            variant="ghost"
+            className={`nav-item flex flex-col items-center py-2 px-3 haptic-feedback ${
+              isActive ? 'text-primary' : 'text-muted-foreground'
+            }`}
+            onClick={() => handleNavigation(item.id)}
+            data-testid={`nav-${item.id}`}
+          >
+            <Icon className="h-5 w-5 mb-1" />
+            <span className="text-xs">{item.label}</span>
+          </Button>
+        );
+      })}
+    </nav>
+  );
+}
