@@ -21,7 +21,7 @@ export function BottomNavigation() {
   };
 
   return (
-    <nav className="bg-card border-t border-border p-2 flex justify-around">
+    <nav className="bg-transparent p-2 flex justify-around">
       {navigationItems.map((item) => {
         const Icon = item.icon;
         const isActive = currentView === item.id;

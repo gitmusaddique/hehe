@@ -30,7 +30,7 @@ export function FloatingActionButton({ onQuickActions }: FloatingActionButtonPro
   };
 
   return (
-    <div className="fixed bottom-20 right-4 z-10">
+    <div className="fixed bottom-24 right-4 z-30">
       <Button
         size="icon"
         className="w-14 h-14 rounded-full shadow-lg floating-action haptic-feedback bg-primary hover:bg-primary/90 text-primary-foreground"

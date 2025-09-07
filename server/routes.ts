@@ -5,7 +5,42 @@ import {
   insertUserSchema, insertWorkoutSchema, insertNutritionLogSchema, 
   insertBodyMetricSchema, insertFoodSchema, insertMLPredictionSchema
 } from "@shared/schema";
-import { predictCalorieBurn, predictWeightLoss } from "../client/src/lib/ml-predictions";
+// Import ML functions from shared location
+const predictCalorieBurn = (input: any) => {
+  const MET_VALUES: Record<string, number> = {
+    'running': 11.5, 'walking': 3.8, 'cycling': 8.0, 'swimming': 10.0,
+    'strength_training': 6.0, 'yoga': 3.0, 'hiit': 12.0, 'default': 6.0
+  };
+  
+  const { exerciseType, duration, weight, age, gender } = input;
+  const met = MET_VALUES[exerciseType.toLowerCase()] || MET_VALUES.default;
+  let calories = met * weight * (duration / 60);
+  
+  const ageAdjustment = 1 - ((age - 25) * 0.002);
+  calories *= Math.max(0.8, ageAdjustment);
+  const genderAdjustment = gender === 'male' ? 1.1 : 1.0;
+  calories *= genderAdjustment;
+  
+  return Math.round(calories);
+};
+
+const predictWeightLoss = (input: any) => {
+  const { currentWeight, targetWeight, weeklyCalorieDeficit, activityLevel } = input;
+  const weightToLose = currentWeight - targetWeight;
+  const totalCaloriesNeeded = weightToLose * 3500;
+  let weeksNeeded = totalCaloriesNeeded / weeklyCalorieDeficit;
+  
+  const activityMultipliers: Record<string, number> = {
+    'sedentary': 1.2, 'lightly_active': 1.0, 'moderately_active': 0.9, 'very_active': 0.8
+  };
+  
+  const multiplier = activityMultipliers[activityLevel] || 1.0;
+  weeksNeeded *= multiplier;
+  const adaptationFactor = 1 + (weightToLose * 0.02);
+  weeksNeeded *= adaptationFactor;
+  
+  return Math.round(weeksNeeded);
+};
 
 export async function registerRoutes(app: Express): Promise<Server> {
   

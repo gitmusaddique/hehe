@@ -15,7 +15,7 @@ export function AppHeader() {
   };
 
   return (
-    <header className="bg-card border-b border-border p-4 flex items-center justify-between">
+    <header className="bg-transparent p-4 flex items-center justify-between">
       <div className="flex items-center space-x-3">
         <img 
           src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=50&h=50" 

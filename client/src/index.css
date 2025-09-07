@@ -158,6 +158,29 @@
     box-shadow: 0 4px 20px rgba(255, 255, 255, 0.1);
   }
 
+  /* Native mobile floating elements */
+  .mobile-header {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+
+  .dark .mobile-header {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  }
+
+  .mobile-bottom-nav {
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  }
+
+  .dark .mobile-bottom-nav {
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Smooth scrolling for mobile */
+  .mobile-scroll {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+
   .progress-ring {
     transform: rotate(-90deg);
   }

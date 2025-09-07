@@ -44,14 +44,24 @@ function AppContent() {
 
   return (
     <div className="h-full flex flex-col max-w-md mx-auto relative bg-background">
-      <AppHeader />
+      {/* Fixed Header */}
+      <div className="fixed top-0 left-1/2 transform -translate-x-1/2 w-full max-w-md z-40 bg-background/95 backdrop-blur-sm mobile-header">
+        <AppHeader />
+      </div>
       
-      <main className="flex-1 overflow-hidden">
-        {renderCurrentView()}
+      {/* Main Content with proper padding for fixed header/bottom */}
+      <main className="flex-1 overflow-hidden pt-20 pb-20">
+        <div className="h-full overflow-y-auto mobile-scroll hide-scrollbar">
+          {renderCurrentView()}
+        </div>
       </main>
 
       <FloatingActionButton onQuickActions={() => setShowQuickActions(true)} />
-      <BottomNavigation />
+      
+      {/* Fixed Bottom Navigation */}
+      <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-md z-40 bg-background/95 backdrop-blur-sm mobile-bottom-nav">
+        <BottomNavigation />
+      </div>
       
       <QuickActionsModal 
         open={showQuickActions} 
