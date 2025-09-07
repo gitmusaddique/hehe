@@ -1,57 +1,120 @@
-import { Camera, Search, Utensils, Clock, Plus, Sun, Moon, Coffee } from "lucide-react";
+import { useState } from "react";
+import { Camera, Search, Utensils, Clock, Plus, Sun, Moon, Coffee, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProgressRing } from "@/components/progress-ring";
+import { FoodSearchModal } from "@/components/food-search-modal";
+import { CreateFoodModal } from "@/components/create-food-modal";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useApp } from "@/context/app-context";
 
 export function NutritionPage() {
-  const todayMeals = [
-    {
-      type: "breakfast",
-      icon: Sun,
-      color: "text-chart-3",
-      totalCalories: 420,
-      foods: [
-        {
-          name: "Overnight Oats",
-          serving: "1 serving",
-          calories: 320,
-          image: "https://images.unsplash.com/photo-1517686469429-8bdb88b9f907?ixlib=rb-4.0.3&auto=format&fit=crop&w=40&h=40"
-        },
-        {
-          name: "Almond Latte",
-          serving: "12 fl oz",
-          calories: 100,
-          image: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?ixlib=rb-4.0.3&auto=format&fit=crop&w=40&h=40"
-        }
-      ]
+  const { user } = useApp();
+  const [showFoodSearch, setShowFoodSearch] = useState(false);
+  const [showCreateFood, setShowCreateFood] = useState(false);
+  const [selectedMealType, setSelectedMealType] = useState<string>("");
+  const queryClient = useQueryClient();
+
+  // Get today's date for filtering
+  const today = new Date().toISOString().split('T')[0];
+  
+  // Fetch nutrition logs for today
+  const { data: nutritionLogs = [], isLoading } = useQuery({
+    queryKey: ["/api/nutrition-logs/user", user?.id, today],
+    enabled: !!user?.id,
+  });
+
+  // Delete nutrition log mutation
+  const deleteFoodMutation = useMutation({
+    mutationFn: async (logId: string) => {
+      return apiRequest(`/api/nutrition-logs/${logId}`, {
+        method: "DELETE",
+      });
     },
-    {
-      type: "lunch",
-      icon: Sun,
-      color: "text-chart-3",
-      totalCalories: 650,
-      foods: [
-        {
-          name: "Grilled Chicken Salad",
-          serving: "Large bowl",
-          calories: 480,
-          image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?ixlib=rb-4.0.3&auto=format&fit=crop&w=40&h=40"
-        },
-        {
-          name: "Avocado",
-          serving: "1/2 medium",
-          calories: 170,
-          image: "https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?ixlib=rb-4.0.3&auto=format&fit=crop&w=40&h=40"
-        }
-      ]
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/nutrition-logs/user", user?.id] });
+    },
+  });
+
+  // Group logs by meal type
+  const mealGroups = nutritionLogs.reduce((acc: any, log: any) => {
+    if (!acc[log.mealType]) {
+      acc[log.mealType] = [];
     }
-  ];
+    acc[log.mealType].push(log);
+    return acc;
+  }, {});
+
+  // Calculate totals
+  const totals = nutritionLogs.reduce(
+    (acc: any, log: any) => {
+      acc.calories += log.calories || 0;
+      acc.protein += log.protein || 0;
+      acc.carbs += log.carbs || 0;
+      acc.fat += log.fat || 0;
+      return acc;
+    },
+    { calories: 0, protein: 0, carbs: 0, fat: 0 }
+  );
+
+  // User's targets (could come from user profile)
+  const targets = {
+    calories: user?.weight ? Math.round(user.weight * 25) : 2200, // rough estimate
+    protein: user?.weight ? Math.round(user.weight * 1.6) : 150,
+    carbs: 300,
+    fat: 87,
+  };
 
   const macros = [
-    { name: "Protein", current: 120, target: 150, percentage: 80, color: "text-chart-1" },
-    { name: "Carbs", current: 180, target: 300, percentage: 60, color: "text-chart-3" },
-    { name: "Fat", current: 65, target: 87, percentage: 75, color: "text-chart-5" },
+    { 
+      name: "Protein", 
+      current: Math.round(totals.protein), 
+      target: targets.protein, 
+      percentage: Math.round((totals.protein / targets.protein) * 100), 
+      color: "text-chart-1" 
+    },
+    { 
+      name: "Carbs", 
+      current: Math.round(totals.carbs), 
+      target: targets.carbs, 
+      percentage: Math.round((totals.carbs / targets.carbs) * 100), 
+      color: "text-chart-3" 
+    },
+    { 
+      name: "Fat", 
+      current: Math.round(totals.fat), 
+      target: targets.fat, 
+      percentage: Math.round((totals.fat / targets.fat) * 100), 
+      color: "text-chart-5" 
+    },
   ];
+
+  const mealTypes = [
+    { type: "breakfast", icon: Sun, color: "text-chart-3", label: "Breakfast" },
+    { type: "lunch", icon: Sun, color: "text-chart-2", label: "Lunch" },
+    { type: "dinner", icon: Moon, color: "text-chart-1", label: "Dinner" },
+    { type: "snack", icon: Coffee, color: "text-chart-4", label: "Snacks" },
+  ];
+
+  const handleAddFood = (mealType: string) => {
+    setSelectedMealType(mealType);
+    setShowFoodSearch(true);
+  };
+
+  const handleDeleteFood = (logId: string) => {
+    deleteFoodMutation.mutate(logId);
+  };
+
+  if (!user) {
+    return (
+      <div className="h-full flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-lg font-medium">Please log in to track nutrition</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-full overflow-y-auto hide-scrollbar p-4 space-y-6">
@@ -68,14 +131,22 @@ export function NutritionPage() {
             <div className="flex items-center justify-between mb-2">
               <span className="font-medium">Calories</span>
               <span className="text-sm text-muted-foreground">
-                <span data-testid="text-calories-consumed">1,850</span> / 
-                <span data-testid="text-calorie-goal"> 2,200</span>
+                <span data-testid="text-calories-consumed">{Math.round(totals.calories)}</span> / 
+                <span data-testid="text-calorie-goal"> {targets.calories}</span>
               </span>
             </div>
             <div className="w-full bg-muted rounded-full h-3 mb-1">
-              <div className="bg-gradient-to-r from-chart-2 to-primary h-3 rounded-full" style={{ width: "84%" }}></div>
+              <div 
+                className="bg-gradient-to-r from-chart-2 to-primary h-3 rounded-full" 
+                style={{ width: `${Math.min((totals.calories / targets.calories) * 100, 100)}%` }}
+              ></div>
             </div>
-            <div className="text-sm text-muted-foreground">350 calories remaining</div>
+            <div className="text-sm text-muted-foreground">
+              {totals.calories >= targets.calories 
+                ? `${Math.round(totals.calories - targets.calories)} calories over` 
+                : `${Math.round(targets.calories - totals.calories)} calories remaining`
+              }
+            </div>
           </div>
 
           {/* Macro Breakdown */}
@@ -103,6 +174,7 @@ export function NutritionPage() {
         <div className="grid grid-cols-2 gap-3">
           <Button 
             className="bg-primary text-primary-foreground p-4 h-auto text-left justify-start haptic-feedback"
+            onClick={() => handleAddFood("breakfast")}
             data-testid="quick-add-scan"
           >
             <div className="flex flex-col items-start space-y-2">
@@ -115,30 +187,33 @@ export function NutritionPage() {
           <Button 
             variant="outline" 
             className="p-4 h-auto text-left justify-start haptic-feedback"
+            onClick={() => handleAddFood("breakfast")}
             data-testid="quick-add-search"
           >
             <div className="flex flex-col items-start space-y-2">
               <Search className="h-5 w-5 text-chart-2" />
               <div className="font-medium">Search Food</div>
-              <div className="text-sm text-muted-foreground">500k+ database</div>
+              <div className="text-sm text-muted-foreground">Database search</div>
             </div>
           </Button>
           
           <Button 
             variant="outline" 
             className="p-4 h-auto text-left justify-start haptic-feedback"
+            onClick={() => setShowCreateFood(true)}
             data-testid="quick-add-recipe"
           >
             <div className="flex flex-col items-start space-y-2">
               <Utensils className="h-5 w-5 text-chart-3" />
-              <div className="font-medium">Create Recipe</div>
-              <div className="text-sm text-muted-foreground">Combine ingredients</div>
+              <div className="font-medium">Create Food</div>
+              <div className="text-sm text-muted-foreground">Custom nutrition</div>
             </div>
           </Button>
           
           <Button 
             variant="outline" 
             className="p-4 h-auto text-left justify-start haptic-feedback"
+            onClick={() => handleAddFood("snack")}
             data-testid="quick-add-recent"
           >
             <div className="flex flex-col items-start space-y-2">
@@ -154,45 +229,62 @@ export function NutritionPage() {
       <div>
         <h3 className="font-semibold mb-3">Today's Meals</h3>
         <div className="space-y-3">
-          
-          {/* Breakfast & Lunch */}
-          {todayMeals.map((meal) => {
-            const Icon = meal.icon;
+          {mealTypes.map((mealType) => {
+            const Icon = mealType.icon;
+            const mealLogs = mealGroups[mealType.type] || [];
+            const mealCalories = mealLogs.reduce((sum: number, log: any) => sum + (log.calories || 0), 0);
             
             return (
-              <Card key={meal.type}>
+              <Card key={mealType.type}>
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center space-x-2">
-                      <Icon className={`h-5 w-5 ${meal.color}`} />
-                      <span className="font-medium capitalize">{meal.type}</span>
+                      <Icon className={`h-5 w-5 ${mealType.color}`} />
+                      <span className="font-medium">{mealType.label}</span>
                     </div>
-                    <span className="text-sm text-muted-foreground">{meal.totalCalories} cal</span>
+                    <span className="text-sm text-muted-foreground">{Math.round(mealCalories)} cal</span>
                   </div>
                   
-                  <div className="space-y-2">
-                    {meal.foods.map((food, index) => (
-                      <div key={index} className="flex items-center justify-between p-2 bg-muted rounded-lg">
-                        <div className="flex items-center space-x-3">
-                          <img 
-                            src={food.image} 
-                            alt={food.name} 
-                            className="w-8 h-8 rounded object-cover"
-                          />
-                          <div>
-                            <div className="text-sm font-medium">{food.name}</div>
-                            <div className="text-xs text-muted-foreground">{food.serving}</div>
+                  {mealLogs.length > 0 ? (
+                    <div className="space-y-2">
+                      {mealLogs.map((log: any) => (
+                        <div key={log.id} className="flex items-center justify-between p-2 bg-muted rounded-lg">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-8 h-8 rounded bg-primary/10 flex items-center justify-center">
+                              <Utensils className="h-4 w-4 text-primary" />
+                            </div>
+                            <div>
+                              <div className="text-sm font-medium">Food Entry</div>
+                              <div className="text-xs text-muted-foreground">{Math.round(log.quantity)}g</div>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <span className="text-sm">{Math.round(log.calories)} cal</span>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6"
+                              onClick={() => handleDeleteFood(log.id)}
+                              data-testid={`delete-food-${log.id}`}
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
                           </div>
                         </div>
-                        <span className="text-sm">{food.calories} cal</span>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-4 text-muted-foreground">
+                      <Utensils className="h-6 w-6 mx-auto mb-2 opacity-50" />
+                      <div className="text-sm">No meals logged yet</div>
+                    </div>
+                  )}
                   
                   <Button 
                     variant="ghost" 
                     className="w-full mt-3 text-primary haptic-feedback"
-                    data-testid={`add-food-${meal.type}`}
+                    onClick={() => handleAddFood(mealType.type)}
+                    data-testid={`add-food-${mealType.type}`}
                   >
                     <Plus className="h-4 w-4 mr-2" />
                     Add Food
@@ -201,33 +293,21 @@ export function NutritionPage() {
               </Card>
             );
           })}
-
-          {/* Dinner - Empty State */}
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center space-x-2">
-                  <Moon className="h-5 w-5 text-chart-1" />
-                  <span className="font-medium">Dinner</span>
-                </div>
-                <Button 
-                  variant="ghost" 
-                  className="text-primary haptic-feedback text-sm"
-                  data-testid="add-food-dinner"
-                >
-                  <Plus className="h-4 w-4 mr-1" />
-                  Add Food
-                </Button>
-              </div>
-              <div className="text-center py-6 text-muted-foreground">
-                <Utensils className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                <div>No meals logged yet</div>
-              </div>
-            </CardContent>
-          </Card>
-
         </div>
       </div>
+
+      {/* Modals */}
+      <FoodSearchModal
+        open={showFoodSearch}
+        onOpenChange={setShowFoodSearch}
+        mealType={selectedMealType}
+        userId={user.id}
+      />
+      
+      <CreateFoodModal
+        open={showCreateFood}
+        onOpenChange={setShowCreateFood}
+      />
 
     </div>
   );
