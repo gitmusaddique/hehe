@@ -1,10 +1,8 @@
-import { Bell, Moon, Sun } from "lucide-react";
+import { Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useTheme } from "@/hooks/use-theme";
 import { useApp } from "@/context/app-context";
 
 export function AppHeader() {
-  const { theme, toggleTheme } = useTheme();
   const { user } = useApp();
 
   const getGreeting = () => {
@@ -39,19 +37,6 @@ export function AppHeader() {
         >
           <Bell className="h-5 w-5" />
           <span className="absolute -top-1 -right-1 w-3 h-3 bg-destructive rounded-full text-xs"></span>
-        </Button>
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="rounded-full haptic-feedback"
-          onClick={toggleTheme}
-          data-testid="button-theme-toggle"
-        >
-          {theme === 'dark' ? (
-            <Sun className="h-5 w-5" />
-          ) : (
-            <Moon className="h-5 w-5" />
-          )}
         </Button>
       </div>
     </header>
