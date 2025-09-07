@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -61,9 +61,18 @@ export function CreateFoodModal({ open, onOpenChange }: CreateFoodModalProps) {
     createFoodMutation.mutate(data);
   };
 
-  const macrosTotal = form.watch("proteinPer100g") * 4 + 
-                    form.watch("carbsPer100g") * 4 + 
-                    form.watch("fatPer100g") * 9;
+  const proteinValue = form.watch("proteinPer100g") || 0;
+  const carbsValue = form.watch("carbsPer100g") || 0;
+  const fatValue = form.watch("fatPer100g") || 0;
+  
+  const macrosTotal = proteinValue * 4 + carbsValue * 4 + fatValue * 9;
+  
+  // Automatically update calories when macros change
+  useEffect(() => {
+    if (macrosTotal > 0) {
+      form.setValue("caloriesPer100g", Math.round(macrosTotal));
+    }
+  }, [macrosTotal, form]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -120,26 +129,16 @@ export function CreateFoodModal({ open, onOpenChange }: CreateFoodModalProps) {
             {/* Nutrition per 100g */}
             <div>
               <h3 className="font-medium mb-2">Nutrition per 100g</h3>
+              
+              {/* Auto-calculated calories display */}
+              {macrosTotal > 0 && (
+                <div className="mb-4 p-3 bg-muted rounded-lg">
+                  <div className="text-sm font-medium">Calories (auto-calculated): {Math.round(macrosTotal)}</div>
+                  <div className="text-xs text-muted-foreground">Based on: Protein × 4 + Carbs × 4 + Fat × 9</div>
+                </div>
+              )}
+              
               <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="caloriesPer100g"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Calories</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="number" 
-                          step="0.1"
-                          {...field} 
-                          onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                          data-testid="input-calories"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
 
                 <FormField
                   control={form.control}
@@ -243,19 +242,6 @@ export function CreateFoodModal({ open, onOpenChange }: CreateFoodModalProps) {
               </div>
             </div>
 
-            {/* Macro verification */}
-            {macrosTotal > 0 && (
-              <Card>
-                <CardContent className="p-3">
-                  <div className="text-sm">
-                    <div className="font-medium">Calculated calories from macros: {Math.round(macrosTotal)}</div>
-                    <div className="text-muted-foreground">
-                      Should match the calories you entered above
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
 
             <div className="flex space-x-2">
               <Button 
