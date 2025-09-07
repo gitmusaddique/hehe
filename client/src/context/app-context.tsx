@@ -1,5 +1,6 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, ReactNode, useEffect } from "react";
 import { type User } from "@shared/schema";
+import { useQuery } from "@tanstack/react-query";
 
 interface AppContextType {
   user: User | null;
@@ -18,6 +19,30 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [isOnboardingComplete, setIsOnboardingComplete] = useState(
     localStorage.getItem('fitlife_onboarding_complete') === 'true'
   );
+
+  // Load user from localStorage on app start
+  useEffect(() => {
+    const userId = localStorage.getItem('fitlife_user_id');
+    if (userId && isOnboardingComplete) {
+      // The user will be loaded via the query below
+      return;
+    }
+  }, [isOnboardingComplete]);
+
+  // Fetch user data if we have a user ID
+  const userId = localStorage.getItem('fitlife_user_id');
+  const { data: userData } = useQuery({
+    queryKey: ['/api/users', userId],
+    enabled: !!userId && isOnboardingComplete && !user,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  // Set user when data is loaded
+  useEffect(() => {
+    if (userData && !user) {
+      setUser(userData);
+    }
+  }, [userData, user]);
 
   return (
     <AppContext.Provider value={{

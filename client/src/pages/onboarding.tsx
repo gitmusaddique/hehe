@@ -6,6 +6,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Progress } from "@/components/ui/progress";
 import { useApp } from "@/context/app-context";
 import { Weight, Target, Dumbbell, TrendingUp } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 
 interface OnboardingData {
   age: number;
@@ -18,7 +20,7 @@ interface OnboardingData {
 }
 
 export function OnboardingPage() {
-  const { setIsOnboardingComplete, setCurrentView } = useApp();
+  const { setIsOnboardingComplete, setCurrentView, setUser } = useApp();
   const [currentStep, setCurrentStep] = useState(1);
   const [data, setData] = useState<OnboardingData>({
     age: 25,
@@ -50,11 +52,39 @@ export function OnboardingPage() {
     }
   };
 
+  const createUserMutation = useMutation({
+    mutationFn: async (userData: any) => {
+      return apiRequest("/api/users", {
+        method: "POST",
+        body: JSON.stringify(userData),
+      });
+    },
+    onSuccess: (user) => {
+      setUser(user);
+      localStorage.setItem('fitlife_onboarding_complete', 'true');
+      localStorage.setItem('fitlife_user_id', user.id);
+      setIsOnboardingComplete(true);
+      setCurrentView('dashboard');
+    },
+  });
+
   const completeOnboarding = () => {
-    localStorage.setItem('fitlife_onboarding_complete', 'true');
-    localStorage.setItem('fitlife_onboarding_data', JSON.stringify(data));
-    setIsOnboardingComplete(true);
-    setCurrentView('dashboard');
+    const userData = {
+      username: `user_${Date.now()}`, // Generate a unique username
+      email: `user_${Date.now()}@fitlife.com`, // Generate a unique email
+      password: 'temp_password', // In a real app, this would be properly handled
+      fullName: 'FitLife User',
+      age: data.age,
+      height: data.height,
+      weight: data.weight,
+      activityLevel: data.activityLevel,
+      goal: data.goal,
+      targetWeight: data.targetWeight,
+      targetTimeline: data.targetTimeline,
+      onboardingComplete: true,
+    };
+    
+    createUserMutation.mutate(userData);
   };
 
   const goals = [
@@ -231,10 +261,10 @@ export function OnboardingPage() {
         </Button>
         <Button
           onClick={nextStep}
-          disabled={currentStep === 2 && (!data.goal || !data.targetTimeline)}
+          disabled={(currentStep === 2 && (!data.goal || !data.targetTimeline)) || createUserMutation.isPending}
           data-testid="button-next"
         >
-          {currentStep === totalSteps ? 'Get Started' : 'Continue'}
+          {createUserMutation.isPending ? 'Setting up...' : (currentStep === totalSteps ? 'Get Started' : 'Continue')}
         </Button>
       </div>
     </div>
