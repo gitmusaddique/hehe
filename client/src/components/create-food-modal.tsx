@@ -51,7 +51,12 @@ export function CreateFoodModal({ open, onOpenChange }: CreateFoodModalProps) {
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/foods"] });
+      // Invalidate all food-related queries (including search queries)
+      queryClient.invalidateQueries({ 
+        predicate: (query) => {
+          return query.queryKey[0] === "/api/foods";
+        }
+      });
       onOpenChange(false);
       form.reset();
     },
