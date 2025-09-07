@@ -21,7 +21,7 @@ export function BottomNavigation() {
   };
 
   return (
-    <nav className="bg-transparent p-2 flex justify-around">
+    <nav className="bg-transparent p-2 flex justify-between items-center w-full overflow-hidden">
       {navigationItems.map((item) => {
         const Icon = item.icon;
         const isActive = currentView === item.id;
@@ -30,14 +30,14 @@ export function BottomNavigation() {
           <Button
             key={item.id}
             variant="ghost"
-            className={`nav-item flex flex-col items-center py-2 px-3 haptic-feedback ${
+            className={`nav-item flex flex-col items-center py-2 px-1 min-w-0 flex-1 haptic-feedback ${
               isActive ? 'text-primary' : 'text-muted-foreground'
             }`}
             onClick={() => handleNavigation(item.id)}
             data-testid={`nav-${item.id}`}
           >
-            <Icon className="h-5 w-5 mb-1" />
-            <span className="text-xs">{item.label}</span>
+            <Icon className="h-5 w-5 mb-1 shrink-0" />
+            <span className="text-xs truncate w-full text-center">{item.label}</span>
           </Button>
         );
       })}

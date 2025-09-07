@@ -59,7 +59,7 @@ function AppContent() {
       <FloatingActionButton onQuickActions={() => setShowQuickActions(true)} />
       
       {/* Fixed Bottom Navigation */}
-      <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-md z-40 bg-background border-t border-border mobile-bottom-nav">
+      <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-md z-40 bg-background border-t border-border mobile-bottom-nav overflow-hidden">
         <BottomNavigation />
       </div>
       
