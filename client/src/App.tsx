@@ -45,7 +45,7 @@ function AppContent() {
   return (
     <div className="h-full flex flex-col max-w-md mx-auto relative bg-background">
       {/* Fixed Header */}
-      <div className="fixed top-0 left-1/2 transform -translate-x-1/2 w-full max-w-md z-40 bg-background/95 backdrop-blur-sm mobile-header">
+      <div className="fixed top-0 left-1/2 transform -translate-x-1/2 w-full max-w-md z-40 bg-background border-b border-border mobile-header">
         <AppHeader />
       </div>
       
@@ -59,7 +59,7 @@ function AppContent() {
       <FloatingActionButton onQuickActions={() => setShowQuickActions(true)} />
       
       {/* Fixed Bottom Navigation */}
-      <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-md z-40 bg-background/95 backdrop-blur-sm mobile-bottom-nav">
+      <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-md z-40 bg-background border-t border-border mobile-bottom-nav">
         <BottomNavigation />
       </div>
       
