@@ -59,7 +59,7 @@ export function OnboardingPage() {
         body: JSON.stringify(userData),
       });
     },
-    onSuccess: (user) => {
+    onSuccess: (user: any) => {
       setUser(user);
       localStorage.setItem('fitlife_onboarding_complete', 'true');
       localStorage.setItem('fitlife_user_id', user.id);
@@ -261,7 +261,7 @@ export function OnboardingPage() {
         </Button>
         <Button
           onClick={nextStep}
-          disabled={(currentStep === 2 && (!data.goal || !data.targetTimeline)) || createUserMutation.isPending}
+          disabled={(currentStep === 2 && (!data.goal || !data.targetTimeline)) || (currentStep > 2 && createUserMutation.isPending)}
           data-testid="button-next"
         >
           {createUserMutation.isPending ? 'Setting up...' : (currentStep === totalSteps ? 'Get Started' : 'Continue')}
