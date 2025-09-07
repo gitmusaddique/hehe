@@ -22,7 +22,10 @@ export function FoodSearchModal({ open, onOpenChange, mealType, userId }: FoodSe
   const queryClient = useQueryClient();
 
   const { data: foods = [], isLoading } = useQuery({
-    queryKey: ["/api/foods", searchQuery],
+    queryKey: ["/api/foods", { search: searchQuery }],
+    queryFn: async () => {
+      return apiRequest(`/api/foods?search=${encodeURIComponent(searchQuery)}`);
+    },
     enabled: searchQuery.length > 2,
   });
 
@@ -167,27 +170,38 @@ export function FoodSearchModal({ open, onOpenChange, mealType, userId }: FoodSe
             </Button>
           </div>
 
-          {/* Recent Foods */}
-          {!searchQuery && recentFoods.length > 0 && (
+          {/* Show some popular foods when no search */}
+          {!searchQuery && (
             <div>
               <h3 className="font-medium mb-2 flex items-center">
                 <Clock className="h-4 w-4 mr-2" />
-                Recent Foods
+                Popular Foods
               </h3>
               <div className="space-y-2">
-                {recentFoods.map((log: any) => (
-                  <Card key={log.id} className="cursor-pointer hover:bg-muted/50" onClick={() => {
-                    // Would need to fetch the full food data here
-                    // setSelectedFood(food);
-                  }}>
-                    <CardContent className="p-3">
-                      <div className="flex justify-between">
-                        <div className="font-medium">Previous Food</div>
-                        <div className="text-sm text-muted-foreground">{Math.round(log.calories)} cal</div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                <Card className="cursor-pointer hover:bg-muted/50" onClick={() => setSearchQuery("chicken")}>
+                  <CardContent className="p-3">
+                    <div className="flex justify-between">
+                      <div className="font-medium">Search "chicken"</div>
+                      <div className="text-sm text-muted-foreground">Popular protein</div>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card className="cursor-pointer hover:bg-muted/50" onClick={() => setSearchQuery("rice")}>
+                  <CardContent className="p-3">
+                    <div className="flex justify-between">
+                      <div className="font-medium">Search "rice"</div>
+                      <div className="text-sm text-muted-foreground">Popular carb</div>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card className="cursor-pointer hover:bg-muted/50" onClick={() => setSearchQuery("banana")}>
+                  <CardContent className="p-3">
+                    <div className="flex justify-between">
+                      <div className="font-medium">Search "banana"</div>
+                      <div className="text-sm text-muted-foreground">Popular fruit</div>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
             </div>
           )}
