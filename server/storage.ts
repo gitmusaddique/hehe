@@ -112,7 +112,14 @@ export class MemStorage implements IStorage {
 
     sampleExercises.forEach(exercise => {
       const id = randomUUID();
-      this.exercises.set(id, { ...exercise, id });
+      this.exercises.set(id, { 
+        ...exercise, 
+        id,
+        equipment: exercise.equipment || null,
+        difficulty: exercise.difficulty || null,
+        instructions: exercise.instructions || null,
+        videoUrl: null
+      });
     });
 
     // Initialize workout templates
@@ -144,7 +151,13 @@ export class MemStorage implements IStorage {
 
     sampleTemplates.forEach(template => {
       const id = randomUUID();
-      this.workoutTemplates.set(id, { ...template, id });
+      this.workoutTemplates.set(id, { 
+        ...template, 
+        id,
+        description: template.description || null,
+        estimatedDuration: template.estimatedDuration || null,
+        isPublic: template.isPublic ?? true
+      });
     });
 
     // Initialize sample foods
@@ -179,7 +192,15 @@ export class MemStorage implements IStorage {
 
     sampleFoods.forEach(food => {
       const id = randomUUID();
-      this.foods.set(id, { ...food, id });
+      this.foods.set(id, { 
+        ...food, 
+        id,
+        brand: food.brand || null,
+        barcode: null,
+        fiberPer100g: food.fiberPer100g || null,
+        sugarPer100g: null,
+        servingSizes: food.servingSizes || null
+      });
     });
   }
 
@@ -199,15 +220,22 @@ export class MemStorage implements IStorage {
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = randomUUID();
     const user: User = { 
-      ...insertUser, 
+      ...insertUser,
       id, 
       createdAt: new Date(),
-      onboardingComplete: false,
-      streakDays: 0,
-      totalWorkouts: 0,
-      totalCaloriesBurned: 0,
-      totalWorkoutHours: 0,
-      achievementsUnlocked: 0,
+      age: insertUser.age ?? null,
+      height: insertUser.height ?? null,
+      weight: insertUser.weight ?? null,
+      activityLevel: insertUser.activityLevel ?? null,
+      goal: insertUser.goal ?? null,
+      targetWeight: insertUser.targetWeight ?? null,
+      targetTimeline: insertUser.targetTimeline ?? null,
+      onboardingComplete: insertUser.onboardingComplete ?? false,
+      streakDays: insertUser.streakDays ?? 0,
+      totalWorkouts: insertUser.totalWorkouts ?? 0,
+      totalCaloriesBurned: insertUser.totalCaloriesBurned ?? 0,
+      totalWorkoutHours: insertUser.totalWorkoutHours ?? 0,
+      achievementsUnlocked: insertUser.achievementsUnlocked ?? 0,
     };
     this.users.set(id, user);
     return user;
@@ -237,7 +265,14 @@ export class MemStorage implements IStorage {
 
   async createExercise(insertExercise: InsertExercise): Promise<Exercise> {
     const id = randomUUID();
-    const exercise: Exercise = { ...insertExercise, id };
+    const exercise: Exercise = { 
+      ...insertExercise, 
+      id,
+      equipment: insertExercise.equipment ?? null,
+      difficulty: insertExercise.difficulty ?? null,
+      instructions: insertExercise.instructions ?? null,
+      videoUrl: insertExercise.videoUrl ?? null
+    };
     this.exercises.set(id, exercise);
     return exercise;
   }
@@ -257,7 +292,11 @@ export class MemStorage implements IStorage {
       ...insertWorkout, 
       id, 
       createdAt: new Date(),
-      completed: false 
+      type: insertWorkout.type ?? null,
+      duration: insertWorkout.duration ?? null,
+      caloriesBurned: insertWorkout.caloriesBurned ?? null,
+      notes: insertWorkout.notes ?? null,
+      completed: insertWorkout.completed ?? false 
     };
     this.workouts.set(id, workout);
     return workout;
@@ -287,7 +326,13 @@ export class MemStorage implements IStorage {
 
   async createWorkoutTemplate(insertTemplate: InsertWorkoutTemplate): Promise<WorkoutTemplate> {
     const id = randomUUID();
-    const template: WorkoutTemplate = { ...insertTemplate, id };
+    const template: WorkoutTemplate = { 
+      ...insertTemplate, 
+      id,
+      description: insertTemplate.description ?? null,
+      estimatedDuration: insertTemplate.estimatedDuration ?? null,
+      isPublic: insertTemplate.isPublic ?? true
+    };
     this.workoutTemplates.set(id, template);
     return template;
   }
@@ -310,7 +355,15 @@ export class MemStorage implements IStorage {
 
   async createFood(insertFood: InsertFood): Promise<Food> {
     const id = randomUUID();
-    const food: Food = { ...insertFood, id };
+    const food: Food = { 
+      ...insertFood, 
+      id,
+      brand: insertFood.brand ?? null,
+      barcode: insertFood.barcode ?? null,
+      fiberPer100g: insertFood.fiberPer100g ?? null,
+      sugarPer100g: insertFood.sugarPer100g ?? null,
+      servingSizes: insertFood.servingSizes ?? null
+    };
     this.foods.set(id, food);
     return food;
   }
@@ -362,7 +415,12 @@ export class MemStorage implements IStorage {
     const metric: BodyMetric = { 
       ...insertMetric, 
       id, 
-      recordedAt: new Date() 
+      recordedAt: new Date(),
+      weight: insertMetric.weight ?? null,
+      bodyFat: insertMetric.bodyFat ?? null,
+      muscleMass: insertMetric.muscleMass ?? null,
+      measurements: insertMetric.measurements ?? null,
+      photoUrls: insertMetric.photoUrls ?? null
     };
     this.bodyMetrics.set(id, metric);
     return metric;
@@ -392,7 +450,8 @@ export class MemStorage implements IStorage {
     const prediction: MLPrediction = { 
       ...insertPrediction, 
       id, 
-      createdAt: new Date() 
+      createdAt: new Date(),
+      confidence: insertPrediction.confidence ?? null
     };
     this.mlPredictions.set(id, prediction);
     return prediction;
