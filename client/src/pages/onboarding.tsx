@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { Progress } from "@/components/ui/progress";
 import { useApp } from "@/context/app-context";
 import { Weight, Target, Dumbbell, TrendingUp } from "lucide-react";
@@ -238,13 +239,89 @@ export function OnboardingPage() {
           </div>
         )}
 
-        {/* Additional steps would go here... */}
-        {currentStep > 2 && (
-          <div className="text-center space-y-4">
-            <h2 className="text-2xl font-bold">Almost ready!</h2>
-            <p className="text-muted-foreground">
-              We're setting up your personalized fitness experience...
-            </p>
+        {/* Step 3: Notifications & Preferences */}
+        {currentStep === 3 && (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-2xl font-bold mb-2">Stay motivated</h2>
+              <p className="text-muted-foreground mb-6">Set up notifications to keep you on track</p>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-4 border border-border rounded-lg">
+                <div>
+                  <h3 className="font-medium">Workout reminders</h3>
+                  <p className="text-sm text-muted-foreground">Get notified when it's time to exercise</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              
+              <div className="flex items-center justify-between p-4 border border-border rounded-lg">
+                <div>
+                  <h3 className="font-medium">Progress updates</h3>
+                  <p className="text-sm text-muted-foreground">Weekly summaries of your fitness journey</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              
+              <div className="flex items-center justify-between p-4 border border-border rounded-lg">
+                <div>
+                  <h3 className="font-medium">Meal logging reminders</h3>
+                  <p className="text-sm text-muted-foreground">Don't forget to track your nutrition</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Step 4: Equipment & Preferences */}
+        {currentStep === 4 && (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-2xl font-bold mb-2">Available equipment</h2>
+              <p className="text-muted-foreground mb-6">Tell us what you have access to</p>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-3">
+              {['Dumbbells', 'Barbell', 'Resistance bands', 'Pull-up bar', 'Kettlebells', 'Treadmill', 'Yoga mat', 'No equipment'].map((equipment) => (
+                <Button
+                  key={equipment}
+                  variant="outline"
+                  className="p-4 h-auto text-center"
+                  onClick={() => {}}
+                >
+                  {equipment}
+                </Button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Step 5: Final Setup */}
+        {currentStep === 5 && (
+          <div className="text-center space-y-6">
+            <div>
+              <h2 className="text-2xl font-bold mb-2">Almost ready!</h2>
+              <p className="text-muted-foreground">
+                We're setting up your personalized fitness experience...
+              </p>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="flex items-center justify-center space-x-2">
+                <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+                <span className="text-sm">Creating your profile</span>
+              </div>
+              <div className="flex items-center justify-center space-x-2">
+                <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+                <span className="text-sm">Generating workout recommendations</span>
+              </div>
+              <div className="flex items-center justify-center space-x-2">
+                <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+                <span className="text-sm">Setting up nutrition tracking</span>
+              </div>
+            </div>
           </div>
         )}
       </div>
