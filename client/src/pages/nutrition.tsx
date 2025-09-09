@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Camera, Search, Utensils, Clock, Plus, Sun, Moon, Coffee, X } from "lucide-react";
+import { Search, Utensils, Plus, Sun, Moon, Coffee, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProgressRing } from "@/components/progress-ring";
@@ -38,7 +38,7 @@ export function NutritionPage() {
   });
 
   // Group logs by meal type
-  const mealGroups = nutritionLogs.reduce((acc: any, log: any) => {
+  const mealGroups = (nutritionLogs as any[]).reduce((acc: any, log: any) => {
     if (!acc[log.mealType]) {
       acc[log.mealType] = [];
     }
@@ -47,7 +47,7 @@ export function NutritionPage() {
   }, {});
 
   // Calculate totals
-  const totals = nutritionLogs.reduce(
+  const totals = (nutritionLogs as any[]).reduce(
     (acc: any, log: any) => {
       acc.calories += log.calories || 0;
       acc.protein += log.protein || 0;
@@ -172,22 +172,11 @@ export function NutritionPage() {
       <div>
         <h3 className="font-semibold mb-3">Quick Add</h3>
         <div className="grid grid-cols-2 gap-3">
-          <Button 
-            className="bg-primary text-primary-foreground p-4 h-auto text-left justify-start haptic-feedback"
-            onClick={() => handleAddFood("breakfast")}
-            data-testid="quick-add-scan"
-          >
-            <div className="flex flex-col items-start space-y-2">
-              <Camera className="h-5 w-5" />
-              <div className="font-medium">Scan Barcode</div>
-              <div className="text-sm opacity-80">Quick food entry</div>
-            </div>
-          </Button>
           
           <Button 
             variant="outline" 
             className="p-4 h-auto text-left justify-start haptic-feedback"
-            onClick={() => handleAddFood("breakfast")}
+            onClick={() => setShowFoodSearch(true)}
             data-testid="quick-add-search"
           >
             <div className="flex flex-col items-start space-y-2">
@@ -210,18 +199,6 @@ export function NutritionPage() {
             </div>
           </Button>
           
-          <Button 
-            variant="outline" 
-            className="p-4 h-auto text-left justify-start haptic-feedback"
-            onClick={() => handleAddFood("snack")}
-            data-testid="quick-add-recent"
-          >
-            <div className="flex flex-col items-start space-y-2">
-              <Clock className="h-5 w-5 text-chart-4" />
-              <div className="font-medium">Recent Foods</div>
-              <div className="text-sm text-muted-foreground">Quick access</div>
-            </div>
-          </Button>
         </div>
       </div>
 

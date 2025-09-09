@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, Plus, Camera, Clock, Utensils, X } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -26,22 +26,9 @@ export function FoodSearchModal({ open, onOpenChange, mealType, userId }: FoodSe
     queryFn: async () => {
       return apiRequest(`/api/foods?search=${encodeURIComponent(searchQuery)}`);
     },
-    enabled: searchQuery.length > 2,
+    enabled: searchQuery.length > 0,
   });
 
-  const { data: recentFoods = [] } = useQuery({
-    queryKey: ["/api/nutrition-logs/user", userId],
-    select: (logs: any[]) => {
-      // Get unique foods from recent logs
-      const foodMap = new Map();
-      logs.forEach(log => {
-        if (!foodMap.has(log.foodId)) {
-          foodMap.set(log.foodId, log);
-        }
-      });
-      return Array.from(foodMap.values()).slice(0, 5);
-    }
-  });
 
   const addFoodMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -154,60 +141,17 @@ export function FoodSearchModal({ open, onOpenChange, mealType, userId }: FoodSe
             />
           </div>
 
-          {/* Quick Options */}
-          <div className="grid grid-cols-2 gap-2">
-            <Button variant="outline" className="h-auto p-3" data-testid="button-scan-barcode">
-              <div className="flex flex-col items-center space-y-1">
-                <Camera className="h-4 w-4" />
-                <span className="text-xs">Scan Barcode</span>
-              </div>
-            </Button>
-            <Button variant="outline" className="h-auto p-3" data-testid="button-create-recipe">
-              <div className="flex flex-col items-center space-y-1">
-                <Utensils className="h-4 w-4" />
-                <span className="text-xs">Create Recipe</span>
-              </div>
-            </Button>
-          </div>
 
-          {/* Show some popular foods when no search */}
+          {/* Show message when no search */}
           {!searchQuery && (
-            <div>
-              <h3 className="font-medium mb-2 flex items-center">
-                <Clock className="h-4 w-4 mr-2" />
-                Popular Foods
-              </h3>
-              <div className="space-y-2">
-                <Card className="cursor-pointer hover:bg-muted/50" onClick={() => setSearchQuery("chicken")}>
-                  <CardContent className="p-3">
-                    <div className="flex justify-between">
-                      <div className="font-medium">Search "chicken"</div>
-                      <div className="text-sm text-muted-foreground">Popular protein</div>
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card className="cursor-pointer hover:bg-muted/50" onClick={() => setSearchQuery("rice")}>
-                  <CardContent className="p-3">
-                    <div className="flex justify-between">
-                      <div className="font-medium">Search "rice"</div>
-                      <div className="text-sm text-muted-foreground">Popular carb</div>
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card className="cursor-pointer hover:bg-muted/50" onClick={() => setSearchQuery("banana")}>
-                  <CardContent className="p-3">
-                    <div className="flex justify-between">
-                      <div className="font-medium">Search "banana"</div>
-                      <div className="text-sm text-muted-foreground">Popular fruit</div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
+            <div className="text-center py-8 text-muted-foreground">
+              <Search className="h-8 w-8 mx-auto mb-2 opacity-50" />
+              <div className="text-sm">Start typing to search for foods in the database</div>
             </div>
           )}
 
           {/* Search Results */}
-          {searchQuery.length > 2 && (
+          {searchQuery.length > 0 && (
             <div>
               <h3 className="font-medium mb-2">Search Results</h3>
               {isLoading ? (
