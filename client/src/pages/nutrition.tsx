@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, Utensils, Plus, Sun, Moon, Coffee, X } from "lucide-react";
+import { Search, Utensils, Plus, Sun, Moon, Coffee, X, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProgressRing } from "@/components/progress-ring";
@@ -10,7 +10,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useApp } from "@/context/app-context";
 
 export function NutritionPage() {
-  const { user } = useApp();
+  const { user, setCurrentView } = useApp();
   const [showFoodSearch, setShowFoodSearch] = useState(false);
   const [showCreateFood, setShowCreateFood] = useState(false);
   const [selectedMealType, setSelectedMealType] = useState<string>("");
@@ -172,7 +172,6 @@ export function NutritionPage() {
       <div>
         <h3 className="font-semibold mb-3">Quick Add</h3>
         <div className="grid grid-cols-2 gap-3">
-          
           <Button 
             variant="outline" 
             className="p-4 h-auto text-left justify-start haptic-feedback"
@@ -199,6 +198,20 @@ export function NutritionPage() {
             </div>
           </Button>
           
+          <Button 
+            variant="outline" 
+            className="p-4 h-auto text-left justify-start haptic-feedback col-span-2"
+            onClick={() => setCurrentView("manage-foods")}
+            data-testid="manage-foods"
+          >
+            <div className="flex items-center space-x-3">
+              <Settings className="h-5 w-5 text-chart-5" />
+              <div>
+                <div className="font-medium">Manage Foods Database</div>
+                <div className="text-sm text-muted-foreground">Edit and delete food entries</div>
+              </div>
+            </div>
+          </Button>
         </div>
       </div>
 

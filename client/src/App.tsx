@@ -12,6 +12,7 @@ import { OnboardingPage } from "@/pages/onboarding";
 import { DashboardPage } from "@/pages/dashboard";
 import { WorkoutsPage } from "@/pages/workouts";
 import { NutritionPage } from "@/pages/nutrition";
+import { ManageFoodsPage } from "@/pages/manage-foods";
 import { ProgressPage } from "@/pages/progress";
 import { ProfilePage } from "@/pages/profile";
 import NotFound from "@/pages/not-found";
@@ -33,6 +34,8 @@ function AppContent() {
         return <WorkoutsPage />;
       case 'nutrition':
         return <NutritionPage />;
+      case 'manage-foods':
+        return <ManageFoodsPage />;
       case 'progress':
         return <ProgressPage />;
       case 'profile':

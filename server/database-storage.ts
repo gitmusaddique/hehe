@@ -99,7 +99,7 @@ export class DatabaseStorage implements IStorage {
 
   // Food methods
   async getAllFoods(): Promise<Food[]> {
-    return await db.select().from(foods).limit(100);
+    return await db.select().from(foods).orderBy(foods.name);
   }
 
   async searchFoods(query: string): Promise<Food[]> {
@@ -113,9 +113,23 @@ export class DatabaseStorage implements IStorage {
     return food || undefined;
   }
 
+  async getFood(id: string): Promise<Food | undefined> {
+    const [food] = await db.select().from(foods).where(eq(foods.id, id));
+    return food || undefined;
+  }
+
   async createFood(insertFood: InsertFood): Promise<Food> {
     const [food] = await db.insert(foods).values(insertFood).returning();
     return food;
+  }
+
+  async updateFood(id: string, updates: InsertFood): Promise<Food> {
+    const [food] = await db.update(foods).set(updates).where(eq(foods.id, id)).returning();
+    return food;
+  }
+
+  async deleteFood(id: string): Promise<void> {
+    await db.delete(foods).where(eq(foods.id, id));
   }
 
   // Nutrition log methods

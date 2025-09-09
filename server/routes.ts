@@ -195,6 +195,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/foods/:id", async (req, res) => {
+    try {
+      const food = await storage.getFood(req.params.id);
+      if (!food) {
+        return res.status(404).json({ message: "Food not found" });
+      }
+      res.json(food);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.put("/api/foods/:id", async (req, res) => {
+    try {
+      const foodData = insertFoodSchema.parse(req.body);
+      const food = await storage.updateFood(req.params.id, foodData);
+      res.json(food);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.delete("/api/foods/:id", async (req, res) => {
+    try {
+      await storage.deleteFood(req.params.id);
+      res.json({ message: "Food deleted successfully" });
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
   // Nutrition log routes
   app.get("/api/nutrition-logs/user/:userId", async (req, res) => {
     try {

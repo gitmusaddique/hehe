@@ -37,7 +37,10 @@ export interface IStorage {
   getAllFoods(): Promise<Food[]>;
   searchFoods(query: string): Promise<Food[]>;
   getFoodByBarcode(barcode: string): Promise<Food | undefined>;
+  getFood(id: string): Promise<Food | undefined>;
   createFood(food: InsertFood): Promise<Food>;
+  updateFood(id: string, updates: InsertFood): Promise<Food>;
+  deleteFood(id: string): Promise<void>;
 
   // Nutrition log methods
   getUserNutritionLogs(userId: string, date?: string): Promise<NutritionLog[]>;
