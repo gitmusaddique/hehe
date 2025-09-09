@@ -1,10 +1,10 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, integer, real, timestamp, json, boolean } from "drizzle-orm/pg-core";
+import { sqliteTable, text, integer, real } from "drizzle-orm/sqlite-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-export const users = pgTable("users", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+export const users = sqliteTable("users", {
+  id: text("id").primaryKey().default(sql`(lower(hex(randomblob(16))))`),
   username: text("username").notNull().unique(),
   email: text("email").notNull().unique(),
   password: text("password").notNull(),
@@ -16,52 +16,52 @@ export const users = pgTable("users", {
   goal: text("goal"), // weight_loss, muscle_gain, maintenance, performance
   targetWeight: real("target_weight"),
   targetTimeline: text("target_timeline"),
-  onboardingComplete: boolean("onboarding_complete").default(false),
+  onboardingComplete: integer("onboarding_complete", { mode: 'boolean' }).default(false),
   streakDays: integer("streak_days").default(0),
   totalWorkouts: integer("total_workouts").default(0),
   totalCaloriesBurned: integer("total_calories_burned").default(0),
   totalWorkoutHours: integer("total_workout_hours").default(0),
   achievementsUnlocked: integer("achievements_unlocked").default(0),
-  createdAt: timestamp("created_at").defaultNow(),
+  createdAt: integer("created_at", { mode: 'timestamp' }).default(sql`(unixepoch())`),
 });
 
-export const exercises = pgTable("exercises", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+export const exercises = sqliteTable("exercises", {
+  id: text("id").primaryKey().default(sql`(lower(hex(randomblob(16))))`),
   name: text("name").notNull(),
   category: text("category").notNull(), // strength, cardio, flexibility, sports
-  muscleGroups: json("muscle_groups").$type<string[]>().notNull(),
+  muscleGroups: text("muscle_groups", { mode: 'json' }).$type<string[]>().notNull(),
   equipment: text("equipment"), // bodyweight, dumbbells, barbells, machines, etc.
   difficulty: text("difficulty"), // beginner, intermediate, advanced
   instructions: text("instructions"),
   videoUrl: text("video_url"),
 });
 
-export const workouts = pgTable("workouts", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").references(() => users.id).notNull(),
+export const workouts = sqliteTable("workouts", {
+  id: text("id").primaryKey().default(sql`(lower(hex(randomblob(16))))`),
+  userId: text("user_id").references(() => users.id).notNull(),
   name: text("name").notNull(),
   type: text("type"), // strength, cardio, flexibility, sports
   duration: integer("duration"), // in minutes
   caloriesBurned: integer("calories_burned"),
-  exercises: json("exercises").$type<{exerciseId: string, sets: number, reps: number, weight?: number, duration?: number}[]>().notNull(),
+  exercises: text("exercises", { mode: 'json' }).$type<{exerciseId: string, sets: number, reps: number, weight?: number, duration?: number}[]>().notNull(),
   notes: text("notes"),
-  completed: boolean("completed").default(false),
-  createdAt: timestamp("created_at").defaultNow(),
+  completed: integer("completed", { mode: 'boolean' }).default(false),
+  createdAt: integer("created_at", { mode: 'timestamp' }).default(sql`(unixepoch())`),
 });
 
-export const workoutTemplates = pgTable("workout_templates", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+export const workoutTemplates = sqliteTable("workout_templates", {
+  id: text("id").primaryKey().default(sql`(lower(hex(randomblob(16))))`),
   name: text("name").notNull(),
   description: text("description"),
   category: text("category").notNull(),
   difficulty: text("difficulty").notNull(),
   estimatedDuration: integer("estimated_duration"), // in minutes
-  exercises: json("exercises").$type<{exerciseId: string, sets: number, reps: number, restTime?: number}[]>().notNull(),
-  isPublic: boolean("is_public").default(true),
+  exercises: text("exercises", { mode: 'json' }).$type<{exerciseId: string, sets: number, reps: number, restTime?: number}[]>().notNull(),
+  isPublic: integer("is_public", { mode: 'boolean' }).default(true),
 });
 
-export const foods = pgTable("foods", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+export const foods = sqliteTable("foods", {
+  id: text("id").primaryKey().default(sql`(lower(hex(randomblob(16))))`),
   name: text("name").notNull(),
   brand: text("brand"),
   barcode: text("barcode"),
@@ -71,51 +71,51 @@ export const foods = pgTable("foods", {
   fatPer100g: real("fat_per_100g").notNull(),
   fiberPer100g: real("fiber_per_100g"),
   sugarPer100g: real("sugar_per_100g"),
-  servingSizes: json("serving_sizes").$type<{name: string, grams: number}[]>(),
+  servingSizes: text("serving_sizes", { mode: 'json' }).$type<{name: string, grams: number}[]>(),
 });
 
-export const nutritionLogs = pgTable("nutrition_logs", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").references(() => users.id).notNull(),
-  foodId: varchar("food_id").references(() => foods.id).notNull(),
+export const nutritionLogs = sqliteTable("nutrition_logs", {
+  id: text("id").primaryKey().default(sql`(lower(hex(randomblob(16))))`),
+  userId: text("user_id").references(() => users.id).notNull(),
+  foodId: text("food_id").references(() => foods.id).notNull(),
   mealType: text("meal_type").notNull(), // breakfast, lunch, dinner, snack
   quantity: real("quantity").notNull(), // in grams
   calories: real("calories").notNull(),
   protein: real("protein").notNull(),
   carbs: real("carbs").notNull(),
   fat: real("fat").notNull(),
-  loggedAt: timestamp("logged_at").defaultNow(),
+  loggedAt: integer("logged_at", { mode: 'timestamp' }).default(sql`(unixepoch())`),
 });
 
-export const bodyMetrics = pgTable("body_metrics", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").references(() => users.id).notNull(),
+export const bodyMetrics = sqliteTable("body_metrics", {
+  id: text("id").primaryKey().default(sql`(lower(hex(randomblob(16))))`),
+  userId: text("user_id").references(() => users.id).notNull(),
   weight: real("weight"),
   bodyFat: real("body_fat"),
   muscleMass: real("muscle_mass"),
-  measurements: json("measurements").$type<{chest?: number, waist?: number, arms?: number, thighs?: number}>(),
-  photoUrls: json("photo_urls").$type<{front?: string, side?: string, back?: string}>(),
-  recordedAt: timestamp("recorded_at").defaultNow(),
+  measurements: text("measurements", { mode: 'json' }).$type<{chest?: number, waist?: number, arms?: number, thighs?: number}>(),
+  photoUrls: text("photo_urls", { mode: 'json' }).$type<{front?: string, side?: string, back?: string}>(),
+  recordedAt: integer("recorded_at", { mode: 'timestamp' }).default(sql`(unixepoch())`),
 });
 
-export const achievements = pgTable("achievements", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").references(() => users.id).notNull(),
+export const achievements = sqliteTable("achievements", {
+  id: text("id").primaryKey().default(sql`(lower(hex(randomblob(16))))`),
+  userId: text("user_id").references(() => users.id).notNull(),
   type: text("type").notNull(), // streak, pr, weight_loss, consistency, etc.
   title: text("title").notNull(),
   description: text("description").notNull(),
   iconName: text("icon_name").notNull(),
-  unlockedAt: timestamp("unlocked_at").defaultNow(),
+  unlockedAt: integer("unlocked_at", { mode: 'timestamp' }).default(sql`(unixepoch())`),
 });
 
-export const mlPredictions = pgTable("ml_predictions", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").references(() => users.id).notNull(),
+export const mlPredictions = sqliteTable("ml_predictions", {
+  id: text("id").primaryKey().default(sql`(lower(hex(randomblob(16))))`),
+  userId: text("user_id").references(() => users.id).notNull(),
   predictionType: text("prediction_type").notNull(), // calorie_burn, weight_prediction, etc.
-  inputData: json("input_data").notNull(),
+  inputData: text("input_data", { mode: 'json' }).notNull(),
   prediction: real("prediction").notNull(),
   confidence: real("confidence"),
-  createdAt: timestamp("created_at").defaultNow(),
+  createdAt: integer("created_at", { mode: 'timestamp' }).default(sql`(unixepoch())`),
 });
 
 // Insert schemas
